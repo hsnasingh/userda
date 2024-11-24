@@ -1,0 +1,143 @@
+1) Assignment 1: (large integer)
+
+
+def karatsuba(X, Y):
+    if X < 10 or Y < 10:
+        return X * Y      #if single digit, then directly multiply them.
+    n = max(len(str(X)), len(str(Y))) // 2        #doing n/2 (based on the large integer multiplication notes).
+    a, b = divmod(X, 10**n)   #dividing the number into 2 parts, a and b.
+    c, d = divmod(Y, 10**n)
+
+    ac = karatsuba(a, c)
+    bd = karatsuba(b, d)
+    ad_bc = karatsuba(a + b, c + d) - ac - bd
+
+    return ac * 10**(2 * n) + ad_bc * 10**n + bd
+
+def binary_to_decimal(binary_str):
+    return int(binary_str, 2)
+
+x = binary_to_decimal(input("Enter 1st binary number: "))
+y = binary_to_decimal(input("Enter 2nd binary number: "))
+print("The product is:", karatsuba(x, y))
+
+
+
+2)Assignment 2:  Bellman Ford
+
+
+class Graph:
+    def __init__(self, num_vertices):    #initializing
+        self.num_vertices = num_vertices
+        self.edges = []  # List to store all edges in the form (start, end, weight)
+        
+    def add_edge(self, start, end, weight):
+        self.edges.append((start, end, weight))
+        
+    def bellman_ford(self, source):
+        distances = [float('inf')] * self.num_vertices   #creating a list.
+        distances[source] = 0  # Distance to the source is always 0.   indexes represents the node/vertex.
+
+        # Relax all edges |V| - 1 times
+        for _ in range(self.num_vertices - 1):
+            for start, end, weight in self.edges:
+                if distances[start] + weight < distances[end]:
+                    distances[end] = distances[start] + weight
+
+        # Check for negative weight cycles
+        for start, end, weight in self.edges:
+            if distances[start] + weight < distances[end]:
+                print("Negative weight cycle detected")
+                return
+
+        # Print the result
+        print("Shortest distances from source:", distances)
+
+# Example usage
+num_vertices = int(input("Enter number of vertices: "))
+num_edges = int(input("Enter number of edges: "))
+graph = Graph(num_vertices)    #creating the 'graph' instance and passing num_vertices to it.
+
+print("Enter each edge as 'start end weight':")
+for _ in range(num_edges):
+    u, v, w = map(int, input().split())   #map/convert the splitted input (of type string) into integer.
+    graph.add_edge(u, v, w)
+
+# Run Bellman-Ford from source vertex 0
+graph.bellman_ford(0)
+
+
+
+3) Assignment 3: Huffman Coding
+
+
+import heapq
+
+class Node:
+    def __init__(self, freq, symbol, left=None, right=None):
+        self.freq = freq
+        self.symbol = symbol
+        self.left = left
+        self.right = right
+    def __lt__(self, other):
+        return self.freq < other.freq    #The __lt__ method enables comparisons based on frequency, which is needed to use heapq efficiently. And arranges the nodes in ascending order. Returns true or false, based on which heapq can arrange the nodes.
+
+def print_codes(node, code=''):
+    if node:
+        if not node.left and not node.right:
+            print(f"{node.symbol} -> {code}")
+        print_codes(node.left, code + '0')
+        print_codes(node.right, code + '1')     #here, we are generating the code and at the end we find out which node that is for and print it.basically, we move left or right and assign the codes in the process.at the end we reach the end node, and so we will then print the code,based on the assigned codes in the process down the road.
+
+chars = ['a', 'b', 'c', 'd', 'e', 'f']
+freq = [5, 9, 12, 13, 16, 45]
+nodes = [Node(f, c) for f, c in zip(freq, chars)]
+heapq.heapify(nodes)  #basically heapify the normal 'nodes' list. Or push nodes in heapq.
+ 
+while len(nodes) > 1:
+    left, right = heapq.heappop(nodes), heapq.heappop(nodes)
+    heapq.heappush(nodes, Node(left.freq + right.freq, left.symbol + right.symbol, left, right)) #pushing the sum of left and right nodes into the heapq.
+
+print_codes(nodes[0])  #as a huffman tree is formed which is stored in 0th index.
+
+
+
+4) Assignment 4 (Graph Coloring)
+
+
+class GraphColoring:
+    def __init__(self, vertices):
+        self.v = vertices
+        self.graph = [[] for _ in range(vertices)]
+
+    def add_edge(self, u, v):
+        self.graph[u].append(v)
+        self.graph[v].append(u)
+
+    def color_graph(self):
+        colors = [-1] * self.v
+        for station in range(self.v):
+            used = {colors[neighbor] for neighbor in self.graph[station] if colors[neighbor] != -1}    #we want to know for only the stations connected to the current station.
+            for color in range(self.v):
+                if color not in used:
+                    colors[station] = color
+                    break
+        return colors
+
+# Menu-driven program
+v = int(input("Enter number of stations: "))
+graph = GraphColoring(v)
+
+while True:
+    print("\n1. Add interference (edge)\n2. Assign frequencies\n3. Exit")
+    choice = input("Enter choice: ")
+
+    if choice == '1':
+        u, v = map(int, input("Enter stations (u v): ").split())
+        graph.add_edge(u, v)
+    elif choice == '2':
+        print("Station frequencies:", graph.color_graph())
+    elif choice == '3':
+        break
+    else:
+        print("Invalid choice.")

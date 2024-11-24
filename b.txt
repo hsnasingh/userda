@@ -1,0 +1,320 @@
+5) Assignment 5 and assignment 7 (job assignment and club assignment):
+
+
+job assignment:
+
+
+# Function to find the minimum cost using Branch and Bound
+def find_min_cost(matrix, worker, assigned, current_cost, best_cost):
+    n = len(matrix)
+    
+    # Base case: all workers have been assigned jobs
+    if worker == n:                              #'worker' here, is no. of workers who have been assigned jobs till now.
+        return min(current_cost, best_cost)
+
+    for job in range(n):
+        if not assigned[job]:  # If job is not yet assigned
+            assigned[job] = True  # Mark job as assigned
+            # Calculate new cost and update best_cost if needed
+            new_cost = current_cost + matrix[worker][job]
+            
+            # Recursive call with branch pruning
+            if new_cost < best_cost:
+                best_cost = find_min_cost(matrix, worker + 1, assigned, new_cost, best_cost)
+                
+            assigned[job] = False  # Backtrack                 # 2-2 ki jugalbandi.
+    
+    return best_cost
+
+# Wrapper function to initialize variables
+def job_assignment(matrix):
+    n = len(matrix)
+    assigned = [False] * n  # Track assigned jobs             #list that is currently all initialized to 'false' as no jobs assigned yet.  like: [false,false,false,false].
+    large_number = 1e9  # Large number as replacement for sys.maxsize
+    return find_min_cost(matrix, 0, assigned, 0, large_number)
+
+# Menu-driven program
+matrix = []
+while True:
+    print("\nJob Assignment Problem")
+    print("1. Input cost matrix")
+    print("2. Find minimum cost assignment")
+    print("3. Exit")
+    
+    choice = input("Enter choice: ")
+
+    if choice == '1':
+        n = int(input("Enter number of workers/jobs: "))
+        matrix = []
+        print("Enter cost matrix (each row for a worker):")
+        for i in range(n):
+            row = list(map(int, input(f"Costs for worker {i + 1}: ").split()))
+            matrix.append(row)          #makes a list of lists
+        print("Matrix saved.")
+
+    elif choice == '2':
+        if not matrix:
+            print("Please enter the cost matrix first.")
+        else:
+            print("Minimum cost:", job_assignment(matrix))
+
+    elif choice == '3':
+        print("Exiting.")
+        break
+
+    else:
+        print("Invalid choice.")
+
+
+
+
+club assignment :
+
+
+# Function to find the minimum cost using Branch and Bound
+def find_min_cost(matrix, student, assigned, current_cost, best_cost):
+    n = len(matrix)
+    
+    # Base case: all students have been assigned clubs
+    if student == n:
+        return min(current_cost, best_cost)
+
+    for club in range(n):
+        if not assigned[club]:  # If club is not yet assigned
+            assigned[club] = True  # Mark club as assigned
+            # Calculate new cost and update best_cost if needed
+            new_cost = current_cost + matrix[student][club]
+            
+            # Recursive call with branch pruning
+            if new_cost < best_cost:
+                best_cost = find_min_cost(matrix, student + 1, assigned, new_cost, best_cost)
+                
+            assigned[club] = False  # Backtrack
+    
+    return best_cost
+
+# Wrapper function to initialize variables
+def club_assignment(matrix):
+    n = len(matrix)
+    assigned = [False] * n  # Track assigned clubs
+    large_number = 1e9  # Large number as replacement for sys.maxsize
+    return find_min_cost(matrix, 0, assigned, 0, large_number)
+
+# Menu-driven program
+matrix = []
+while True:
+    print("\nClub Assignment Problem")
+    print("1. Input cost matrix")
+    print("2. Find minimum cost assignment")
+    print("3. Exit")
+    
+    choice = input("Enter choice: ")
+
+    if choice == '1':
+        n = int(input("Enter number of students/clubs: "))
+        matrix = []
+        print("Enter cost matrix (each row for a student):")
+        for i in range(n):
+            row = list(map(int, input(f"Costs for student {i + 1}: ").split()))
+            matrix.append(row)
+        print("Matrix saved.")
+
+    elif choice == '2':
+        if not matrix:
+            print("Please enter the cost matrix first.")
+        else:
+            print("Minimum cost:", club_assignment(matrix))
+
+    elif choice == '3':
+        print("Exiting.")
+        break
+
+    else:
+        print("Invalid choice.")
+
+
+
+6)  Assignment 6:   0/1 knapsack:
+
+
+
+def knapsack(W, weights, values, n, memo):
+    if n == 0 or W == 0:        #if capacity is 0 or no. of weights to add is 0 , then we cant add anything to knapsack and we return 0.
+        return 0
+
+    if memo[n][W] != -1:             #If memo[n][W] is not -1, it returns the stored result to avoid recalculating the solution for the same subproblem.
+        return memo[n][W]
+
+    if weights[n - 1] <= W:
+        include = values[n - 1] + knapsack(W - weights[n - 1], weights, values, n - 1, memo)
+        exclude = knapsack(W, weights, values, n - 1, memo)
+        memo[n][W] = max(include, exclude)                 #fill the value in memoization matrix.
+    else:
+        memo[n][W] = knapsack(W, weights, values, n - 1, memo)
+
+    return memo[n][W]
+
+# Simplified menu-driven part
+weights = []
+values = []
+
+while True:
+    print("\nKnapsack Problem")
+    print("1. Add item (weight, value)")
+    print("2. Set capacity and solve")
+    print("3. Exit")
+    
+    choice = int(input("Enter choice: "))
+
+    if choice == 1:
+        weights.append(int(input("Enter weight: ")))
+        values.append(int(input("Enter value: ")))
+
+    elif choice == 2:
+        W = int(input("Enter knapsack capacity: "))
+        n = len(weights)
+        memo = [[-1] * (W + 1) for _ in range(n + 1)]         #initialize whole memoization matrix with -1.
+        max_value = knapsack(W, weights, values, n, memo)      #maximum profit (optimization problem).
+        print(f"Max value in knapsack: {max_value}")
+
+    elif choice == 3:
+        print("Exiting.")
+        break
+
+    else:
+        print("Invalid choice.")
+
+
+
+
+
+8)  Assignment 8:  Strong password suggester:
+
+
+import random
+import string
+
+def check_password_strength(password):
+    # Initialize flags for each criteria
+    has_upper = False
+    has_lower = False
+    has_digit = False
+    has_special = False
+
+    # Check each character in the password
+    for char in password:
+        if char.isupper():
+            has_upper = True
+        elif char.islower():
+            has_lower = True
+        elif char.isdigit():
+            has_digit = True
+        elif char in string.punctuation:
+            has_special = True
+
+    # Evaluate the strength
+    if len(password) < 8:
+        return False, "Password is too short. It should be at least 8 characters long."
+    if not has_upper:
+        return False, "Password should have at least one uppercase letter."
+    if not has_lower:
+        return False, "Password should have at least one lowercase letter."
+    if not has_digit:
+        return False, "Password should have at least one digit."
+    if not has_special:
+        return False, "Password should have at least one special character."
+
+    return True, "Password is strong."
+
+def suggest_password():
+    # Generate a random strong password
+    characters = (
+        random.choices(string.ascii_uppercase, k=2) +
+        random.choices(string.ascii_lowercase, k=4) +
+        random.choices(string.digits, k=2) +
+        random.choices(string.punctuation, k=2)
+    )
+    random.shuffle(characters)  # Shuffle to mix characters randomly
+    return ''.join(characters)
+
+# Menu-driven program
+while True:
+    print("\nPassword Strength Checker and Suggester")
+    print("1. Check Password Strength")
+    print("2. Generate Strong Password Suggestion")
+    print("3. Exit")
+    
+    choice = input("Enter choice: ")
+
+    if choice == '1':
+        password = input("Enter password to check: ")
+        is_strong, message = check_password_strength(password)
+        print(message)
+        if not is_strong:
+            print("Suggested Password:", suggest_password())
+
+    elif choice == '2':
+        print("Suggested Strong Password:", suggest_password())
+        
+    elif choice == '3':
+        print("Exiting program.")
+        break
+
+    else:
+        print("Invalid choice. Please try again.")
+
+
+
+
+
+10)   Assignment 10:   parallel quick sort:
+
+
+#include <iostream>
+#include <omp.h>
+using namespace std;
+
+// Partition function using the first element as pivot
+int partition(int arr[], int low, int high) {
+    int pivot = arr[low];  // Pivot is now the first element
+    int i = low + 1, j = high;
+
+    while (i <= j) {
+        while (i <= high && arr[i] <= pivot) i++;  // Find element larger than pivot
+        while (j >= low && arr[j] > pivot) j--;   // Find element smaller than or equal to pivot
+        if (i < j) swap(arr[i], arr[j]);          // Swap out-of-place elements
+    }
+    swap(arr[low], arr[j]);  // Place pivot in its correct position
+    return j;
+}
+
+// Parallel QuickSort function
+void quickSort(int arr[], int low, int high) {
+    if (low < high) {
+        int pivot = partition(arr, low, high);
+
+        #pragma omp parallel sections
+        {
+            #pragma omp section
+            quickSort(arr, low, pivot - 1);
+            #pragma omp section
+            quickSort(arr, pivot + 1, high);
+        }
+    }
+}
+
+int main() {
+    int arr[] = {34, 7, 23, 32, 5, 62};
+    int n = sizeof(arr) / sizeof(arr[0]);
+
+    #pragma omp parallel
+    {
+        #pragma omp single
+        quickSort(arr, 0, n - 1);
+    }
+
+    cout << "Sorted array: ";
+    for (int i = 0; i < n; i++) cout << arr[i] << " ";
+    cout << endl;
+    return 0;
+}

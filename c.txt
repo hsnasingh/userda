@@ -1,0 +1,49 @@
+#python parallel quick sort
+
+
+
+import multiprocessing
+
+# Partition function
+def partition(arr, low, high):
+    pivot = arr[low]  # Pivot is the first element
+    i, j = low + 1, high
+
+    while i <= j:
+        while i <= high and arr[i] <= pivot:
+            i += 1
+        while j >= low and arr[j] > pivot:
+            j -= 1
+        if i < j:
+            arr[i], arr[j] = arr[j], arr[i]  # Swap elements
+
+    arr[low], arr[j] = arr[j], arr[low]  # Place pivot in the correct position
+    return j
+
+# QuickSort function
+def quick_sort(arr, low, high):
+    if low < high:
+        pivot = partition(arr, low, high)
+
+        # Create two processes for parallel sorting
+        left_process = multiprocessing.Process(target=quick_sort, args=(arr, low, pivot - 1))
+        right_process = multiprocessing.Process(target=quick_sort, args=(arr, pivot + 1, high))
+
+        left_process.start()
+        right_process.start()
+
+        # Wait for both processes to finish
+        left_process.join()
+        right_process.join()
+
+# Main function
+if __name__ == "__main__":
+    arr = [34, 7, 23, 32, 5, 62]
+    n = len(arr)
+
+    print("Original array:", arr)
+
+    # Use multiprocessing for parallel QuickSort
+    quick_sort(arr, 0, n - 1)
+
+    print("Sorted array:", arr)
